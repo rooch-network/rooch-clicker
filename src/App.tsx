@@ -285,7 +285,9 @@ function App() {
                           : 500,
                     }}
                   >
-                    <Typography>{shortAddress(i.owner, 6, 6)}</Typography>
+                    <Typography>
+                      {shortAddress(i.owner_bitcoin_address, 6, 6)}
+                    </Typography>
                     <Typography
                       style={{
                         fontVariantNumeric: "tabular-nums lining-nums",
