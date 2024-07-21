@@ -99,11 +99,26 @@ function App() {
       },
       queryOption: {
         decode: true,
+        descending: false,
       },
     },
     { refetchInterval: 3000 }
   );
-  console.log("🚀 ~ file: App.tsx:73 ~ App ~ coinOwner:", coinOwnerList);
+  console.log(
+    "🚀 ~ file: App.tsx:73 ~ App ~ coinOwner:",
+    coinOwnerList?.data
+      .filter(
+        (i) =>
+          i.owner !==
+          "rooch1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhxqaen"
+      )
+      .sort((a, b) => {
+        return (
+          Number((b.decoded_value?.value.balance as any).value.value) -
+          Number((a.decoded_value?.value.balance as any).value.value)
+        );
+      })
+  );
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
