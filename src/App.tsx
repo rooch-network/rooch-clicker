@@ -1,9 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Copyright (c) RoochNetwork
 // SPDX-License-Identifier: Apache-2.0
 // Author: Jason Jo
 
 import { LoadingButton } from "@mui/lab";
-import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  Divider,
+  Drawer,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { Args, Transaction } from "@roochnetwork/rooch-sdk";
 import {
   UseSignAndExecuteTransaction,
@@ -20,6 +29,7 @@ import { useState } from "react";
 import "./App.css";
 import { fNumber, shortAddress } from "./utils";
 import CountUp from "react-countup";
+import { styled, useTheme } from "@mui/material/styles";
 
 function getNextRewardClick(currentClicks: number): number {
   const remainder = currentClicks % 21;
@@ -29,6 +39,28 @@ function getNextRewardClick(currentClicks: number): number {
     return currentClicks + (21 - remainder);
   }
 }
+
+const drawerWidth = 300;
+
+const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
+  open?: boolean;
+}>(({ theme, open }) => ({
+  flexGrow: 1,
+  alignItems: "center",
+  padding: theme.spacing(3),
+  transition: theme.transitions.create("margin", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  marginLeft: `${open ? drawerWidth : "0"}px`,
+  ...(open && {
+    transition: theme.transitions.create("margin", {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    // marginLeft: 0,
+  }),
+}));
 
 // Publish address of the counter contract
 const counterAddress =
@@ -57,6 +89,23 @@ function App() {
   // const { data, refetch } = useRoochClientQuery("executeViewFunction", {
   //   target: `${counterAddress}::clicker::value`,
   // });
+
+  const { data: coinOwnerList } = useRoochClientQuery(
+    "queryObjectStates",
+    {
+      filter: {
+        object_type:
+          "0x3::coin_store::CoinStore<0xe94e9b71c161b87b32bd679aebfdd0e106cd173fefc67edf178024081f33a812::rooch_clicker_coin::RCC>",
+      },
+      queryOption: {
+        decode: true,
+      },
+    },
+    { refetchInterval: 3000 }
+  );
+  console.log("🚀 ~ file: App.tsx:73 ~ App ~ coinOwner:", coinOwnerList);
+
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const { data, refetch } = useRoochClientQuery(
     "queryObjectStates",
@@ -139,15 +188,17 @@ function App() {
         </Stack>
       </Stack>
       <Stack className="w-full" justifyContent="space-between">
-        <Typography className="text-4xl font-semibold mt-6 text-left w-full mb-4">
-          Rooch Clicker |{" "}
-          {RCCBalance && (
-            <span className="text-2xl">
-              Balance: {fNumber(RCCBalance.balance.toString())}
-              RCC <span className="text-xs ml-2">( Rooch Clicker Coin )</span>
-            </span>
-          )}
-        </Typography>{" "}
+        <Stack>
+          <Typography className="text-4xl font-semibold mt-6 text-left w-full mb-4">
+            Rooch Clicker |{" "}
+            {RCCBalance && (
+              <span className="text-2xl">
+                Balance: {fNumber(RCCBalance.balance.toString())}
+                RCC <span className="text-xs ml-2">( Rooch Clicker Coin )</span>
+              </span>
+            )}
+          </Typography>
+        </Stack>{" "}
         <Stack className="w-1/3" justifyContent="flex-end">
           {!sessionKey ? (
             <LoadingButton
@@ -177,7 +228,7 @@ function App() {
           )}
         </Stack>
       </Stack>
-      <Divider className="w-full" />
+      {/* <Divider className="w-full" /> */}
       <Stack
         className="mt-4 w-full font-medium "
         direction="column"
@@ -187,13 +238,81 @@ function App() {
           Rooch Clicker
           <span className="text-base font-normal ml-4">({counterAddress})</span>
         </Typography> */}
-        <Stack
-          // className="mt-"
-          spacing={1}
-          direction="column"
-          alignItems="center"
+        <Drawer
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              boxSizing: "border-box",
+              marginTop: "168px",
+              height: "calc(100% - 168px)",
+              background: "transparent",
+              p: 2,
+            },
+          }}
+          variant="persistent"
+          anchor="left"
+          open={showLeaderboard}
         >
-          <Stack spacing={2} className="text-xl">
+          <Stack>
+            <Typography className="text-xl font-semibold">
+              Leaderboard
+            </Typography>
+          </Stack>
+          <Stack direction="column" className="mt-4" spacing={1.5}>
+            {coinOwnerList?.data
+              .filter(
+                (i) =>
+                  i.owner !==
+                  "rooch1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhxqaen"
+              )
+              .sort((a, b) => {
+                return (
+                  Number((b.decoded_value?.value.balance as any).value.value) -
+                  Number((a.decoded_value?.value.balance as any).value.value)
+                );
+              })
+              .map((i) => {
+                return (
+                  <Stack
+                    className="w-full"
+                    justifyContent="space-between"
+                    sx={{
+                      fontWeight:
+                        i.owner === currentAddress?.genRoochAddress().toStr()
+                          ? 700
+                          : 500,
+                    }}
+                  >
+                    <Typography>{shortAddress(i.owner, 6, 6)}</Typography>
+                    <Typography
+                      style={{
+                        fontVariantNumeric: "tabular-nums lining-nums",
+                      }}
+                    >
+                      {fNumber(
+                        Number(
+                          (i.decoded_value?.value.balance as any).value.value
+                        )
+                      )}
+                    </Typography>
+                  </Stack>
+                );
+              })}
+          </Stack>
+        </Drawer>
+        <Main
+          open={showLeaderboard}
+          // className="mt-"
+          // spacing={1}
+          // direction="column"
+          // alignItems="center"
+        >
+          <Stack
+            spacing={2}
+            className="text-xl w-full text-center items-center justify-center"
+          >
             <Typography>Join our Click Challenge!</Typography>
             <Typography>
               Every time you hit a multiple of{" "}
@@ -201,6 +320,15 @@ function App() {
             </Typography>
             <Typography>You're in for 1,000 RCC!</Typography>
           </Stack>
+          <Button
+            className="!mt-4"
+            onClick={() => {
+              setShowLeaderboard(!showLeaderboard);
+            }}
+            variant="outlined"
+          >
+            Leaderboard
+          </Button>
           <Typography className="text-base !mt-4">
             Global Clicker Counter:{" "}
           </Typography>
@@ -217,10 +345,38 @@ function App() {
             sx={{
               fontSize: "360px",
             }}
+            onClick={async () => {
+              if (!sessionKey) {
+                return;
+              }
+              try {
+                setTxnLoading(true);
+                const txn = new Transaction();
+                txn.callFunction({
+                  address: counterAddress,
+                  module: "clicker",
+                  function: "click",
+                  args: [
+                    // rooch counter
+                    Args.objectId(roochCounterObject),
+                    // treasury
+                    Args.objectId(treasuryObject),
+                  ],
+                });
+                await signAndExecuteTransaction({ transaction: txn });
+                await Promise.all([refetch(), refetchRCCBalance()]);
+              } catch (error) {
+                console.error(String(error));
+              } finally {
+                setTxnLoading(false);
+              }
+            }}
           >
             <CountUp
               style={{
                 fontVariantNumeric: "tabular-nums lining-nums",
+                userSelect: "none",
+                cursor: "pointer",
               }}
               preserveValue
               duration={3}
@@ -263,7 +419,7 @@ function App() {
           >
             {sessionKey ? "Click!!!" : "Please create Session Key first"}
           </LoadingButton>
-        </Stack>
+        </Main>
       </Stack>
     </Stack>
   );
