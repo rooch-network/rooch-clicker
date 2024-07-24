@@ -18,9 +18,11 @@ import {
   useWalletStore,
   useWallets,
 } from "@roochnetwork/rooch-sdk-kit";
+import { enqueueSnackbar } from "notistack";
 import { useState } from "react";
 import CountUp from "react-countup";
 import "./App.css";
+import { useRccOwner } from "./hooks/useRccOwner";
 import { fNumber, shortAddress } from "./utils";
 
 function getNextRewardClick(currentClicks: number): number {
@@ -50,7 +52,6 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    // marginLeft: 0,
   }),
 }));
 
@@ -63,6 +64,15 @@ const roochCounterObject =
 
 const treasuryObject =
   "0xdd0013565776613f97eb695095c640db9f9bc1fe392a9539b936d6056c66af99";
+
+const treasuryOwnerAddress =
+  "rooch1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhxqaen";
+
+const rccCoinType =
+  "0xe94e9b71c161b87b32bd679aebfdd0e106cd173fefc67edf178024081f33a812::rooch_clicker_coin::RCC";
+
+export const rccCoinStoreType =
+  "0x3::coin_store::CoinStore<0xe94e9b71c161b87b32bd679aebfdd0e106cd173fefc67edf178024081f33a812::rooch_clicker_coin::RCC>";
 
 function App() {
   const wallets = useWallets();
@@ -79,21 +89,7 @@ function App() {
   const { mutateAsync: signAndExecuteTransaction } =
     UseSignAndExecuteTransaction();
 
-  const { data: coinOwnerList } = useRoochClientQuery(
-    "queryObjectStates",
-    {
-      filter: {
-        object_type:
-          "0x3::coin_store::CoinStore<0xe94e9b71c161b87b32bd679aebfdd0e106cd173fefc67edf178024081f33a812::rooch_clicker_coin::RCC>",
-      },
-      queryOption: {
-        decode: true,
-        descending: false,
-      },
-    },
-    { refetchInterval: 3000 }
-  );
-  console.log("🚀 ~ file: App.tsx:100 ~ App ~ coinOwnerList:", coinOwnerList);
+  const { rccOwnerList } = useRccOwner();
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
@@ -112,8 +108,7 @@ function App() {
     "getBalance",
     {
       owner: currentAddress?.genRoochAddress().toStr() || "",
-      coinType:
-        "0xe94e9b71c161b87b32bd679aebfdd0e106cd173fefc67edf178024081f33a812::rooch_clicker_coin::RCC",
+      coinType: rccCoinType,
     }
   );
 
@@ -137,8 +132,34 @@ function App() {
         onSuccess: (result) => {
           console.log("session key", result);
         },
-        onError: (why) => {
-          console.log(why);
+        onError: (error) => {
+          if (String(error).includes("1004")) {
+            enqueueSnackbar("Insufficient gas, please claim gas first", {
+              variant: "warning",
+              action: (
+                <a
+                  href="https://rooch.network/build/getting-started/get-gas-coin"
+                  target="_blank"
+                >
+                  <Chip
+                    size="small"
+                    label="Get Rooch Testnet Coin"
+                    variant="filled"
+                    className="font-semibold !text-slate-50 min-h-10"
+                    sx={{
+                      background: "#000",
+                      borderRadius: "12px",
+                      cursor: "pointer",
+                    }}
+                  />
+                </a>
+              ),
+            });
+          } else {
+            enqueueSnackbar(String(error), {
+              variant: "warning",
+            });
+          }
         },
       }
     ).finally(() => setSessionLoading(false));
@@ -259,12 +280,8 @@ function App() {
             </Typography>
           </Stack>
           <Stack direction="column" className="mt-4" spacing={1.5}>
-            {coinOwnerList?.data
-              .filter(
-                (i) =>
-                  i.owner !==
-                  "rooch1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhxqaen"
-              )
+            {rccOwnerList
+              ?.filter((i) => i.owner !== treasuryOwnerAddress)
               .sort((a, b) => {
                 return (
                   Number((b.decoded_value?.value.balance as any).value.value) -
@@ -337,7 +354,7 @@ function App() {
           <Typography
             className="tracking-wide font-black"
             sx={{
-              fontSize: "360px",
+              fontSize: showLeaderboard ? "240px" : "360px",
             }}
             onClick={async () => {
               if (!sessionKey) {
@@ -406,6 +423,15 @@ function App() {
                 await Promise.all([refetch(), refetchRCCBalance()]);
               } catch (error) {
                 console.error(String(error));
+                if (String(error).includes("1004")) {
+                  enqueueSnackbar("Insufficient gas, please claim gas first", {
+                    variant: "warning",
+                  });
+                } else {
+                  enqueueSnackbar(String(error), {
+                    variant: "warning",
+                  });
+                }
               } finally {
                 setTxnLoading(false);
               }
