@@ -93,6 +93,7 @@ function App() {
     },
     { refetchInterval: 3000 }
   );
+  console.log("🚀 ~ file: App.tsx:100 ~ App ~ coinOwnerList:", coinOwnerList);
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
