@@ -160,6 +160,21 @@ function App() {
             variant="filled"
             className="font-semibold !bg-slate-950 !text-slate-50 min-h-10"
           />
+          <a
+            href="https://rooch.network/build/getting-started/get-gas-coin"
+            target="_blank"
+          >
+            <Chip
+              label="Get Rooch Testnet Coin"
+              variant="filled"
+              className="font-semibold !text-slate-50 min-h-10"
+              sx={{
+                background: "#006BE6",
+                borderRadius: "12px",
+                cursor: "pointer",
+              }}
+            />
+          </a>
           <Button
             variant="outlined"
             onClick={async () => {
@@ -182,8 +197,8 @@ function App() {
             Rooch Clicker |{" "}
             {RCCBalance && (
               <span className="text-2xl">
-                Balance: {fNumber(RCCBalance.balance.toString())}
-                RCC <span className="text-xs ml-2">( Rooch Clicker Coin )</span>
+                Balance: {fNumber(RCCBalance.balance.toString())} RCC{" "}
+                <span className="text-xs ml-2">( Rooch Clicker Coin )</span>
               </span>
             )}
           </Typography>
