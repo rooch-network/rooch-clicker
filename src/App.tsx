@@ -4,15 +4,8 @@
 // Author: Jason Jo
 
 import { LoadingButton } from "@mui/lab";
-import {
-  Box,
-  Button,
-  Chip,
-  Divider,
-  Drawer,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Button, Chip, Drawer, Stack, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { Args, Transaction } from "@roochnetwork/rooch-sdk";
 import {
   UseSignAndExecuteTransaction,
@@ -26,10 +19,9 @@ import {
   useWallets,
 } from "@roochnetwork/rooch-sdk-kit";
 import { useState } from "react";
+import CountUp from "react-countup";
 import "./App.css";
 import { fNumber, shortAddress } from "./utils";
-import CountUp from "react-countup";
-import { styled, useTheme } from "@mui/material/styles";
 
 function getNextRewardClick(currentClicks: number): number {
   const remainder = currentClicks % 21;
@@ -86,9 +78,6 @@ function App() {
   const { mutateAsync: removeSessionKey } = useRemoveSession();
   const { mutateAsync: signAndExecuteTransaction } =
     UseSignAndExecuteTransaction();
-  // const { data, refetch } = useRoochClientQuery("executeViewFunction", {
-  //   target: `${counterAddress}::clicker::value`,
-  // });
 
   const { data: coinOwnerList } = useRoochClientQuery(
     "queryObjectStates",
@@ -103,21 +92,6 @@ function App() {
       },
     },
     { refetchInterval: 3000 }
-  );
-  console.log(
-    "🚀 ~ file: App.tsx:73 ~ App ~ coinOwner:",
-    coinOwnerList?.data
-      .filter(
-        (i) =>
-          i.owner !==
-          "rooch1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhxqaen"
-      )
-      .sort((a, b) => {
-        return (
-          Number((b.decoded_value?.value.balance as any).value.value) -
-          Number((a.decoded_value?.value.balance as any).value.value)
-        );
-      })
   );
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -141,7 +115,6 @@ function App() {
         "0xe94e9b71c161b87b32bd679aebfdd0e106cd173fefc67edf178024081f33a812::rooch_clicker_coin::RCC",
     }
   );
-  console.log("🚀 ~ file: App.tsx:78 ~ App ~ RCCBalance:", RCCBalance);
 
   const [sessionLoading, setSessionLoading] = useState(false);
   const [txnLoading, setTxnLoading] = useState(false);
@@ -197,7 +170,7 @@ function App() {
             }}
           >
             {connectionStatus === "connected"
-              ? shortAddress(currentAddress?.genRoochAddress().toStr(), 8, 6)
+              ? shortAddress(currentAddress?.toStr(), 8, 6)
               : "Connect Wallet"}
           </Button>
         </Stack>
@@ -227,32 +200,26 @@ function App() {
             >
               {connectionStatus !== "connected"
                 ? "Please connect wallet first"
-                : "Create"}
+                : "Create Session Key"}
             </LoadingButton>
           ) : (
             <Button
               variant="contained"
               className="!mt-4"
-              // size="small"
               onClick={() => {
                 removeSessionKey({ authKey: sessionKey.getAuthKey() });
               }}
             >
-              Clear Session
+              Clear Session Key
             </Button>
           )}
         </Stack>
       </Stack>
-      {/* <Divider className="w-full" /> */}
       <Stack
         className="mt-4 w-full font-medium "
         direction="column"
         alignItems="center"
       >
-        {/* <Typography className="text-3xl font-bold">
-          Rooch Clicker
-          <span className="text-base font-normal ml-4">({counterAddress})</span>
-        </Typography> */}
         <Drawer
           sx={{
             width: drawerWidth,
@@ -319,13 +286,7 @@ function App() {
               })}
           </Stack>
         </Drawer>
-        <Main
-          open={showLeaderboard}
-          // className="mt-"
-          // spacing={1}
-          // direction="column"
-          // alignItems="center"
-        >
+        <Main open={showLeaderboard}>
           <Stack
             spacing={2}
             className="text-xl w-full text-center items-center justify-center"
