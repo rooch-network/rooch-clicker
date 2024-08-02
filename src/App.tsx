@@ -354,7 +354,7 @@ function App() {
           <Typography
             className="tracking-wide font-black"
             sx={{
-              fontSize: showLeaderboard ? "240px" : "360px",
+              fontSize: showLeaderboard ? "160px" : "240px",
             }}
             onClick={async () => {
               if (!sessionKey) {
