@@ -18,6 +18,7 @@ const fetchAllOwner = async (client: RoochClient) => {
       },
       cursor,
     });
+    console.log("🚀 ~ file: useRccOwner.tsx:21 ~ fetchAllOwner ~ data:", data);
     cursor = data.next_cursor ?? null;
     result = result.concat(data.data);
     if (!data.has_next_page) {

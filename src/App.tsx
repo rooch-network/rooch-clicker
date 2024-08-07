@@ -94,10 +94,10 @@ function App() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const { data, refetch } = useRoochClientQuery(
-    "queryObjectStates",
+    "getStates",
     {
-      filter: { object_id: roochCounterObject },
-      queryOption: {
+      accessPath: `/object/${roochCounterObject}`,
+      stateOption: {
         decode: true,
       },
     },
@@ -347,7 +347,7 @@ function App() {
             Next Bonus Click:{" "}
             {getNextRewardClick(
               Number(
-                data?.data[0].decoded_value?.value.global_click_count.toString()
+                data?.[0].decoded_value?.value.global_click_count.toString()
               )
             )}{" "}
           </Typography>
@@ -393,7 +393,7 @@ function App() {
               duration={3}
               decimal=","
               end={Number(
-                data?.data[0].decoded_value?.value.global_click_count.toString() ||
+                data?.[0].decoded_value?.value.global_click_count.toString() ||
                   0
               )}
             />
