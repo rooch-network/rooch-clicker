@@ -4,7 +4,7 @@
 module rooch_clicker::rooch_clicker_coin {
 
     use std::string;
-    
+    use std::option;
     use moveos_std::object::{Self, Object};
     use rooch_framework::coin;
     use rooch_framework::coin_store::{Self, CoinStore};
@@ -24,6 +24,7 @@ module rooch_clicker::rooch_clicker_coin {
         let coin_info_obj = coin::register_extend<RCC>(
             string::utf8(b"Rooch Clicker Coin"),
             string::utf8(b"RCC"),
+            option::none(),
             DECIMALS,
         );
         // Mint the total supply of coins, and store it to the treasury

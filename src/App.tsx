@@ -57,22 +57,22 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
 
 // Publish address of the counter contract
 const counterAddress =
-  "0xe94e9b71c161b87b32bd679aebfdd0e106cd173fefc67edf178024081f33a812";
+  "0x872502737008ac71c4c008bb3846a688bfd9fa54c6724089ea51b72f813dc71e";
 
 const roochCounterObject =
-  "0x5047c0dd0a62cef9055cdeba7036dd267d1cfd1a4f9d3c2dcaf826ae1a54540a";
+  "0x24e093a6fa4698d1b6efd27ae9f1c21057b91bb9a2ef3c0fce2c94b44601764b";
 
 const treasuryObject =
-  "0xdd0013565776613f97eb695095c640db9f9bc1fe392a9539b936d6056c66af99";
+  "0xe7beeda989fa0b2201c945310d533c82027c3270a39e2bcbaa65c4563210db82";
 
 const treasuryOwnerAddress =
   "rooch1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhxqaen";
 
 const rccCoinType =
-  "0xe94e9b71c161b87b32bd679aebfdd0e106cd173fefc67edf178024081f33a812::rooch_clicker_coin::RCC";
+  "0x872502737008ac71c4c008bb3846a688bfd9fa54c6724089ea51b72f813dc71e::rooch_clicker_coin::RCC";
 
 export const rccCoinStoreType =
-  "0x3::coin_store::CoinStore<0xe94e9b71c161b87b32bd679aebfdd0e106cd173fefc67edf178024081f33a812::rooch_clicker_coin::RCC>";
+  "0x3::coin_store::CoinStore<0x872502737008ac71c4c008bb3846a688bfd9fa54c6724089ea51b72f813dc71e::rooch_clicker_coin::RCC>";
 
 function App() {
   const wallets = useWallets();
